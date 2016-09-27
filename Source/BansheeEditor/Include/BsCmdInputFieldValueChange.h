@@ -33,10 +33,8 @@ namespace BansheeEngine
 		{
 			CmdInputFieldValueChange* command = 
 				new (bs_alloc<CmdInputFieldValueChange>()) CmdInputFieldValueChange(description, inputField, value);
-			SPtr<CmdInputFieldValueChange> commandPtr = bs_shared_ptr(command);
-
-			UndoRedo::instance().registerCommand(commandPtr);
-			commandPtr->commit();
+			UndoRedo::instance().registerCommand(command);
+			command->commit();
 		}
 
 		/** @copydoc EditorCommand::commit */

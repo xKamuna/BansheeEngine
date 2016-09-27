@@ -53,7 +53,7 @@ namespace BansheeEngine
 		void popGroup(const String& name);
 
 		/**	Registers a new undo command. */
-		void registerCommand(const SPtr<EditorCommand>& command);
+		void registerCommand(EditorCommand* command);
 
 		/**	Returns the unique identifier for the command on top of the undo stack. */
 		UINT32 getTopCommandId() const;
@@ -70,10 +70,10 @@ namespace BansheeEngine
 
 	private:
 		/**	Removes the last undo command from the undo stack, and returns it. */
-		SPtr<EditorCommand> removeLastFromUndoStack();
+		EditorCommand* removeLastFromUndoStack();
 
 		/**	Adds a new command to the undo stack. */
-		void addToUndoStack(const SPtr<EditorCommand>& command);
+		void addToUndoStack(EditorCommand* command);
 
 		/**	Removes all entries from the undo stack. */
 		void clearUndoStack();
@@ -83,8 +83,8 @@ namespace BansheeEngine
 
 		static const UINT32 MAX_STACK_ELEMENTS;
 
-		SPtr<EditorCommand>* mUndoStack;
-		SPtr<EditorCommand>* mRedoStack;
+		EditorCommand** mUndoStack;
+		EditorCommand** mRedoStack;
 
 		UINT32 mUndoStackPtr;
 		UINT32 mUndoNumElements;
