@@ -78,6 +78,7 @@ namespace bs
 		typedef void(BS_THUNKCALL *OnCreatedThunkDef) (MonoObject*, MonoException**);
 		typedef void(BS_THUNKCALL *OnInitializedThunkDef) (MonoObject*, MonoException**);
 		typedef void(BS_THUNKCALL *OnUpdateThunkDef) (MonoObject*, MonoException**);
+		typedef void(BS_THUNKCALL *OnFixedUpdateThunkDef) (MonoObject*, MonoException**);
 		typedef void(BS_THUNKCALL *OnDestroyedThunkDef) (MonoObject*, MonoException**);
 		typedef void(BS_THUNKCALL *OnResetThunkDef) (MonoObject*, MonoException**);
 		typedef void(BS_THUNKCALL *OnEnabledThunkDef) (MonoObject*, MonoException**);
@@ -100,6 +101,7 @@ namespace bs
 		OnCreatedThunkDef mOnCreatedThunk = nullptr;
 		OnInitializedThunkDef mOnInitializedThunk = nullptr;
 		OnUpdateThunkDef mOnUpdateThunk = nullptr;
+		OnFixedUpdateThunkDef mOnFixedUpdateThunk = nullptr;
 		OnResetThunkDef mOnResetThunk = nullptr;
 		OnDestroyedThunkDef mOnDestroyThunk = nullptr;
 		OnDestroyedThunkDef mOnDisabledThunk = nullptr;
@@ -141,6 +143,9 @@ namespace bs
 	public:
 		/** @copydoc Component::update */
 		void update() override;
+
+		/** @copydoc Component::fixedUpdate */
+		void fixedUpdate() override;
 
 		/** @copydoc Component::typeEquals */
 		bool typeEquals(const Component& other) override;

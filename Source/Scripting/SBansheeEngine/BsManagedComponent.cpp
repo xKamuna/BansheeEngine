@@ -85,6 +85,7 @@ namespace bs
 			mOnCreatedThunk = nullptr;
 			mOnInitializedThunk = nullptr;
 			mOnUpdateThunk = nullptr;
+			mOnFixedUpdateThunk = nullptr;
 			mOnDestroyThunk = nullptr;
 			mOnEnabledThunk = nullptr;
 			mOnDisabledThunk = nullptr;
@@ -144,6 +145,7 @@ namespace bs
 		mOnCreatedThunk = nullptr;
 		mOnInitializedThunk = nullptr;
 		mOnUpdateThunk = nullptr;
+		mOnFixedUpdateThunk = nullptr;
 		mOnResetThunk = nullptr;
 		mOnDestroyThunk = nullptr;
 		mOnDisabledThunk = nullptr;
@@ -172,6 +174,13 @@ namespace bs
 				MonoMethod* onUpdateMethod = mManagedClass->getMethod("OnUpdate", 0);
 				if (onUpdateMethod != nullptr)
 					mOnUpdateThunk = (OnUpdateThunkDef)onUpdateMethod->getThunk();
+			}
+
+			if (mOnFixedUpdateThunk == nullptr)
+			{
+				MonoMethod* onFixedUpdateMethod = mManagedClass->getMethod("OnFixedUpdate", 0);
+				if (onFixedUpdateMethod != nullptr)
+					mOnFixedUpdateThunk = (OnFixedUpdateThunkDef)onFixedUpdateMethod->getThunk();
 			}
 
 			if (mOnResetThunk == nullptr)
@@ -286,6 +295,18 @@ namespace bs
 			// Note: Not calling virtual methods. Can be easily done if needed but for now doing this
 			// for some extra speed.
 			MonoUtil::invokeThunk(mOnUpdateThunk, instance);
+		}
+	}
+
+	void ManagedComponent::fixedUpdate()
+	{
+		if (mOnFixedUpdateThunk != nullptr)
+		{
+			MonoObject* instance = mOwner->getManagedInstance();
+
+			// Note: Not calling virtual methods. Can be easily done if needed but for now doing this
+			// for some extra speed.
+			MonoUtil::invokeThunk(mOnFixedUpdateThunk, instance);
 		}
 	}
 
