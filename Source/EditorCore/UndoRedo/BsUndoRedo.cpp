@@ -29,12 +29,15 @@ namespace bs
 			return;
 
 		SPtr<EditorCommand> command = removeLastFromUndoStack();
-		
-		mRedoStackPtr = (mRedoStackPtr + 1) % MAX_STACK_ELEMENTS;
-		mRedoStack[mRedoStackPtr] = command;
-		mRedoNumElements = std::min(mRedoNumElements + 1, MAX_STACK_ELEMENTS);
 
-		command->revert();
+		if (command)
+		{
+			mRedoStackPtr = (mRedoStackPtr + 1) % MAX_STACK_ELEMENTS;
+			mRedoStack[mRedoStackPtr] = command;
+			mRedoNumElements = std::min(mRedoNumElements + 1, MAX_STACK_ELEMENTS);
+
+			command->revert();
+		}
 	}
 
 	void UndoRedo::redo()
