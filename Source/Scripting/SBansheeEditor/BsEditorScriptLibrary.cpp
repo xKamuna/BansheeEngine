@@ -27,6 +27,7 @@ namespace bs
 	{
 		Path engineAssemblyPath = gApplication().getEngineAssemblyPath();
 		Path gameAssemblyPath = gApplication().getGameAssemblyPath();
+		const Path gameResourcesPath = Paths::getGameResourcesPath().getAbsolute(gEditorApplication().getProjectPath());
 
 		Path editorAssemblyPath = gEditorApplication().getEditorAssemblyPath();
 		Path editorScriptAssemblyPath = gEditorApplication().getEditorScriptAssemblyPath();
@@ -54,6 +55,12 @@ namespace bs
 					assemblies.push_back({ SCRIPT_EDITOR_ASSEMBLY, editorScriptAssemblyPath });
 			}
 
+			if (FileSystem::exists(gameResourcesPath))
+			{
+				addOtherAssemblies(gameResourcesPath, assemblies);
+				MonoManager::instance().buildAssembliesPath(assemblies);
+			}
+
 			ScriptObjectManager::instance().refreshAssemblies(assemblies);
 		}
 		else // Otherwise just additively load them
@@ -74,6 +81,14 @@ namespace bs
 			{
 				MonoManager::instance().loadAssembly(editorScriptAssemblyPath.toString(), SCRIPT_EDITOR_ASSEMBLY);
 				ScriptAssemblyManager::instance().loadAssemblyInfo(SCRIPT_EDITOR_ASSEMBLY);
+			}
+
+			if (FileSystem::exists(gameResourcesPath))
+			{
+				Vector<std::pair<String, Path>> assemblies;
+				addOtherAssemblies(gameResourcesPath, assemblies);
+				MonoManager::instance().buildAssembliesPath(assemblies);
+				loadOtherAssemblies(assemblies);
 			}
 
 			mScriptAssembliesLoaded = true;

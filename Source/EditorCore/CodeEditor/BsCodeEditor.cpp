@@ -7,6 +7,7 @@
 #include "Resources/BsScriptCodeImportOptions.h"
 #include "Build/BsBuildManager.h"
 #include "CodeEditor/BsMDCodeEditor.h"
+#include "FileSystem/BsFileSystem.h"
 
 #if BS_PLATFORM == BS_PLATFORM_WIN32
 #include "Win32/BsVSCodeEditor.h"
@@ -82,6 +83,27 @@ namespace bs
 		mActiveEditor->openFile(getSolutionPath(), filePath, lineNumber);
 	}
 
+	void CodeEditorManager::addOtherAssemblies(const Path& path, Vector<CodeProjectReference>& assemblies) const
+	{
+		Vector<Path> files;
+		Vector<Path> directories;
+		String name;
+		FileSystem::getChildren(path, files, directories);
+		for (auto& file : files)
+		{
+			//If dll, load assembly.  TODO: Linux/Mac/etc. formats.  Make platform-agnostic.
+			if (file.getExtension() == ".dll")
+			{
+				name = file.getFilename(false);
+				assemblies.push_back(CodeProjectReference{ name, file });
+			}
+		}
+		for (auto& directory : directories)
+		{
+			addOtherAssemblies(directory, assemblies); //Search in subdirectories.
+		}
+	}
+
 	void CodeEditorManager::syncSolution() const
 	{
 		if (mActiveEditor == nullptr)
@@ -112,6 +134,8 @@ namespace bs
 		gameProject.assemblyReferences.push_back(CodeProjectReference{ String(ENGINE_ASSEMBLY), gApplication().getEngineAssemblyPath() });
 		for (auto& assemblyName : frameworkAssemblies)
 			gameProject.assemblyReferences.push_back(CodeProjectReference{ assemblyName, Path::BLANK });
+		const Path gameResourcesPath = Paths::getGameResourcesPath().getAbsolute(gEditorApplication().getProjectPath());
+		addOtherAssemblies(gameResourcesPath, gameProject.assemblyReferences);
 
 		// Editor project
 		CodeProjectData& editorProject = slnData.projects[1];
@@ -202,7 +226,7 @@ EndProject)";
 	<AppDesignerFolder>Properties</AppDesignerFolder>
 	<RootNamespace></RootNamespace>
 	<AssemblyName>{2}</AssemblyName>
-	<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+	<TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
 	<FileAlignment>512</FileAlignment>
 	<BaseDirectory>Resources</BaseDirectory>
 	<SchemaVersion>2.0</SchemaVersion>

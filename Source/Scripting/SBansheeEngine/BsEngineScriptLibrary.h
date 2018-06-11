@@ -17,6 +17,12 @@ namespace bs
 	public:
 		EngineScriptLibrary();
 
+		/**	Loads the all assemblies in folder and subfolders. */
+		void loadOtherAssemblies(Vector<std::pair<String, Path>>& assemblies);
+
+		/**	Adds the all assemblies in folder and subfolders to assemblies. */
+		void addOtherAssemblies(const Path& path, Vector<std::pair<String, Path>>& assemblies);
+
 		/** @copydoc ScriptLibrary::initialize */
 		void initialize() override;
 

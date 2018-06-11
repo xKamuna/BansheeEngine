@@ -7,6 +7,7 @@ using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Linq;
 using BansheeEngine;
 
 namespace BansheeEditor
@@ -75,29 +76,56 @@ namespace BansheeEditor
                     : EditorApplication.BuiltinReleaseAssemblyPath;
 
             string[] frameworkAssemblies = BuildManager.GetFrameworkAssemblies(platform);
+            var otherAssemblies = Directory.GetFiles(ProjectLibrary.ResourceFolder, "*.dll", SearchOption.AllDirectories).ToList(); //TODO: Make platform-agnostic.
             if (type == ScriptAssemblyType.Game)
             {
-                assemblyFolders = new string[]
-                {
-                    builtinAssemblyPath, 
-                    EditorApplication.FrameworkAssemblyPath
-                };
+                assemblyFolders = new string[otherAssemblies.Count + 2];
+                assemblies = new string[frameworkAssemblies.Length + otherAssemblies.Count + 1];
 
-                assemblies = new string[frameworkAssemblies.Length + 1];
+                //TODO: Remove duplicate folders.
+                {
+                    int i = 0;
+                    foreach (var otherAssembly in otherAssemblies)
+                    {
+                        assemblyFolders[i] = Path.GetDirectoryName(otherAssembly);
+                        assemblies[i] = Path.GetFileNameWithoutExtension(otherAssembly);
+                        ++i;    
+                    }
+                }
+                assemblyFolders[assemblyFolders.Length - 2] = builtinAssemblyPath;
+                assemblyFolders[assemblyFolders.Length - 1] = EditorApplication.FrameworkAssemblyPath;
+
+                /*foreach (var assemblyFolder in assemblyFolders)
+                {
+                    //Debug.Print(assemblyFolder);
+                    BansheeEngine.Debug.Log(assemblyFolder);
+                }*/
+
+               
+                //otherAssemblies.CopyTo(assemblies, 0);
                 assemblies[assemblies.Length - 1] = EditorApplication.EngineAssemblyName;
 
                 outputFile = Path.Combine(outputDir, EditorApplication.ScriptGameAssemblyName);
             }
             else
             {
-                assemblyFolders = new string[]
-                {
-                    builtinAssemblyPath, 
-                    EditorApplication.FrameworkAssemblyPath,
-                    EditorApplication.ScriptAssemblyPath
-                };
+                assemblyFolders = new string[otherAssemblies.Count + 3];
+                assemblies = new string[frameworkAssemblies.Length + otherAssemblies.Count + 3];
 
-                assemblies = new string[frameworkAssemblies.Length + 3];
+                //TODO: Remove duplicate folders.
+                {
+                    int i = 0;
+                    foreach (var otherAssembly in otherAssemblies)
+                    {
+                        assemblyFolders[i] = Path.GetDirectoryName(otherAssembly);
+                        assemblies[i] = Path.GetFileNameWithoutExtension(otherAssembly);
+                        ++i;
+                    }
+                }
+                assemblyFolders[assemblyFolders.Length - 3] = builtinAssemblyPath;
+                assemblyFolders[assemblyFolders.Length - 2] = EditorApplication.FrameworkAssemblyPath;
+                assemblyFolders[assemblyFolders.Length - 1] = EditorApplication.ScriptAssemblyPath;
+
                 assemblies[assemblies.Length - 1] = EditorApplication.EngineAssemblyName;
                 assemblies[assemblies.Length - 2] = EditorApplication.EditorAssemblyName;
                 assemblies[assemblies.Length - 3] = EditorApplication.ScriptGameAssemblyName;
@@ -105,7 +133,7 @@ namespace BansheeEditor
                 outputFile = Path.Combine(outputDir, EditorApplication.ScriptEditorAssemblyName);
             }
 
-            Array.Copy(frameworkAssemblies, assemblies, frameworkAssemblies.Length);
+            Array.Copy(frameworkAssemblies, 0, assemblies, otherAssemblies.Count, frameworkAssemblies.Length);
 
             string defines = BuildManager.GetDefines(platform);
             return new CompilerInstance(scriptFiles.ToArray(), defines, assemblyFolders, assemblies, debug, outputFile);
@@ -168,7 +196,6 @@ namespace BansheeEditor
 
                 for (int i = 0; i < assemblies.Length - 1; i++)
                     argumentsBuilder.Append(assemblies[i] + ",");
-
                 argumentsBuilder.Append(assemblies[assemblies.Length - 1]);
             }
 

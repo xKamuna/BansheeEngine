@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Threading;
+using System.Linq;
 using BansheeEngine;
 
 namespace BansheeEditor
@@ -346,6 +347,15 @@ namespace BansheeEditor
                 File.Copy(srcFile, destFile);
             }
 
+            //Copy assembly resources
+            string destResourceAssemblyFolder = Path.Combine(destRoot, frameworkAssemblyFolder);
+            var otherAssemblies = Directory.GetFiles(ProjectLibrary.ResourceFolder, "*.dll", SearchOption.AllDirectories).ToList(); //TODO: Make platform-agnostic.
+            foreach(var assembly in otherAssemblies)
+            {
+                string destFile = Path.Combine(destResourceAssemblyFolder, Path.GetFileName(assembly));
+                File.Copy(assembly, destFile);
+            }
+            
             // Copy Mono
             string monoFolder = GetBuildFolder(BuildFolder.Mono, activePlatform);
             string srcMonoFolder = Path.Combine(srcRoot, monoFolder);

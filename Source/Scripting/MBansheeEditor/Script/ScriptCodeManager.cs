@@ -1,5 +1,6 @@
 ﻿//********************************** Banshee Engine (www.banshee3d.com) **************************************************//
 //**************** Copyright (c) 2016 Marko Pintera (marko.pintera@gmail.com). All rights reserved. **********************//
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using BansheeEngine;
@@ -156,6 +157,7 @@ namespace BansheeEditor
         /// <returns>True if the file is relevant to the code editor, false otherwise.</returns>
         private bool IsCodeEditorFile(string path)
         {
+            if (Path.GetExtension(path) == ".dll") return true; //Include assemblies. TODO: Make platform-agnostic.
             LibraryEntry entry = ProjectLibrary.GetEntry(path);
             if (entry != null && entry.Type == LibraryEntryType.File)
             {

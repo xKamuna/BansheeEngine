@@ -192,7 +192,7 @@ namespace bs
 
 			if (mOnDestroyThunk == nullptr)
 			{
-				MonoMethod* onDestroyMethod = mManagedClass->getMethod("OnDestroy", 0);
+				MonoMethod* onDestroyMethod = mManagedClass->getMethod("OnDestroy", 0	);
 				if (onDestroyMethod != nullptr)
 					mOnDestroyThunk = (OnDestroyedThunkDef)onDestroyMethod->getThunk();
 			}

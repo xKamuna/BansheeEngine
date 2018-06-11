@@ -75,6 +75,9 @@ namespace bs
 		 */
 		void openFile(const Path& path, UINT32 lineNumber) const;
 
+		/**	Adds the all assemblies in folder and subfolders to assemblies. */
+		void addOtherAssemblies(const Path& path, Vector<CodeProjectReference>& assemblies) const;
+
 		/**
 		 * Synchronizes all code files and assemblies in the active project and updates the project solution for the active
 		 * editor. Each project can only have one solution per editor.

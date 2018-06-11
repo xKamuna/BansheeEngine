@@ -26,6 +26,36 @@ namespace bs
 		:mScriptAssembliesLoaded(false)
 	{ }
 
+	void EngineScriptLibrary::loadOtherAssemblies(Vector<std::pair<String, Path>>& assemblies)
+	{
+		for (auto assembly : assemblies)
+		{
+			MonoManager::instance().loadAssembly(assembly.second.toString(), assembly.first);
+			ScriptAssemblyManager::instance().loadAssemblyInfo(assembly.first);
+		}
+	}
+
+	void EngineScriptLibrary::addOtherAssemblies(const Path& path, Vector<std::pair<String, Path>>& assemblies)
+	{
+		Vector<Path> files;
+		Vector<Path> directories;
+		String name;
+		FileSystem::getChildren(path, files, directories);
+		for (auto& file : files)
+		{
+			//If dll, load assembly.  TODO: Linux/Mac/etc. formats.  Make platform-agnostic.
+			if (file.getExtension() == ".dll")
+			{
+				name = file.getFilename(false);
+				assemblies.push_back({ name, file });
+			}
+		}
+		for (auto& directory : directories)
+		{
+			addOtherAssemblies(directory, assemblies); //Search in subdirectories.
+		}
+	}
+
 	void EngineScriptLibrary::initialize()
 	{
 		Path engineAssemblyPath = gApplication().getEngineAssemblyPath();
@@ -56,6 +86,8 @@ namespace bs
 			ScriptAssemblyManager::instance().loadAssemblyInfo(SCRIPT_GAME_ASSEMBLY);
 		}
 
+		
+
 		bansheeEngineAssembly.invoke(ASSEMBLY_ENTRY_POINT);
 	}
 
@@ -63,6 +95,7 @@ namespace bs
 	{
 		Path engineAssemblyPath = gApplication().getEngineAssemblyPath();
 		Path gameAssemblyPath = gApplication().getGameAssemblyPath();
+		Path gameResourcesPath = Paths::getGameResourcesPath();
 
 		// Do a full refresh if we have already loaded script assemblies
 		if (mScriptAssembliesLoaded)
@@ -73,6 +106,13 @@ namespace bs
 			if (FileSystem::exists(gameAssemblyPath))
 				assemblies.push_back({ SCRIPT_GAME_ASSEMBLY, gameAssemblyPath });
 
+			if (FileSystem::exists(gameResourcesPath))
+			{
+				addOtherAssemblies(gameResourcesPath, assemblies);
+				MonoManager::instance().buildAssembliesPath(assemblies);
+			}
+
+			MonoManager::instance().buildAssembliesPath(assemblies);
 			ScriptObjectManager::instance().refreshAssemblies(assemblies);
 		}
 		else // Otherwise just additively load them
@@ -84,6 +124,14 @@ namespace bs
 			{
 				MonoManager::instance().loadAssembly(gameAssemblyPath.toString(), SCRIPT_GAME_ASSEMBLY);
 				ScriptAssemblyManager::instance().loadAssemblyInfo(SCRIPT_GAME_ASSEMBLY);
+			}
+			
+			if (FileSystem::exists(gameResourcesPath))
+			{
+				Vector<std::pair<String, Path>> assemblies;
+				addOtherAssemblies(gameResourcesPath, assemblies);
+				MonoManager::instance().buildAssembliesPath(assemblies);
+				loadOtherAssemblies(assemblies);
 			}
 
 			mScriptAssembliesLoaded = true;
